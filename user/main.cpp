@@ -43,6 +43,13 @@ Maintainer: Gregory Cristian & Gilbert Menth
  */
 #define TX_OUTPUT_POWER                             13
 
+
+
+extern serial_t    stdio_uart;
+extern int         stdio_uart_inited;
+
+
+
 /*!
  * \brief Defines the states of the application
  */
@@ -186,7 +193,12 @@ int main( )
     bool isMaster = true;
     ModulationParams_t modulationParams;
 
-    baud( 115200 );
+  
+		serial_init(&stdio_uart,PA_2,PA_3);
+	  stdio_uart_inited = 1;
+	
+	
+	  baud( 115200 );
 
 
     RxLed  = 1;
@@ -237,8 +249,8 @@ int main( )
 
     s.printf( "\nPing Pong running in LORA mode\n\r");
     modulationParams.PacketType                  = PACKET_TYPE_LORA;
-    modulationParams.Params.LoRa.SpreadingFactor = LORA_SF7;
-    modulationParams.Params.LoRa.Bandwidth       = LORA_BW_0400;
+    modulationParams.Params.LoRa.SpreadingFactor = LORA_SF5;
+    modulationParams.Params.LoRa.Bandwidth       = LORA_BW_0200;
     modulationParams.Params.LoRa.CodingRate      = LORA_CR_4_5;
 
     PacketParams.PacketType                 = PACKET_TYPE_LORA;
@@ -296,6 +308,10 @@ int main( )
                 AppState = APP_LOWPOWER;
                 RxLed = !RxLed;
                 Radio.GetPayload( Buffer, &BufferSize, BUFFER_SIZE );
+								Radio.GetPacketStatus(&PacketStatus);
+								RssiValue = PacketStatus.LoRa.RssiPkt;
+								SnrValue = PacketStatus.LoRa.SnrPkt;
+								printf("rssi: %d;snr: %d\n\r", RssiValue, SnrValue );
                 if( isMaster == true )
                 {
                     if( BufferSize > 0 )
@@ -418,16 +434,16 @@ void OnTxDone( void )
 
 void OnRxDone( void )
 {
-    AppState = APP_RX;/*
-    Radio.GetPacketStatus(&packetStatus);
-#if ( defined( MODE_BLE ) || defined( MODE_GENERIC ) )
-    RssiValue = packetStatus.Ble.RssiSync;
-    s.printf("rssi: %d\n\r", RssiValue);
-#elif defined( MODE_LORA )
-    RssiValue = packetStatus.Lr24.RssiPkt;
-    SnrValue = packetStatus.Lr24.SnrPkt;
-    s.printf("rssi: %d; snr: %d\n\r", RssiValue, SnrValue );
-#endif*/
+    AppState = APP_RX;
+//    Radio.GetPacketStatus(&PacketStatus);
+//#if ( defined( MODE_BLE ) || defined( MODE_GENERIC ) )
+//    RssiValue = PacketStatus.Ble.RssiSync;
+//    s.printf("rssi: %d\n\r", RssiValue);
+//#elif defined( MODE_LORA )
+//    RssiValue = PacketStatus.LoRa.RssiPkt;
+//    SnrValue = PacketStatus.LoRa.SnrPkt;
+//    printf("rssi: %d\n\r", RssiValue);
+//#endif
 }
 
 void OnTxTimeout( void )
