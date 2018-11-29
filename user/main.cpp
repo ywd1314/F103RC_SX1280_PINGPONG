@@ -41,8 +41,11 @@ Maintainer: Gregory Cristian & Gilbert Menth
  *
  * \remark The range of the output power is [-18..+13] dBm
  */
-#define TX_OUTPUT_POWER                             13
+#define TX_OUTPUT_POWER                             13  //12dBm and 20dBm change
 
+
+unsigned int tx_times = 0;
+unsigned int rx_times = 0;
 
 
 extern serial_t    stdio_uart;
@@ -149,12 +152,12 @@ DigitalOut RxLed( PD_2 );
 /*!
  * \brief Number of tick size steps for tx timeout
  */
-#define TX_TIMEOUT_VALUE                            100 // ms
+#define TX_TIMEOUT_VALUE                            100 // ms,unkown factor
 
 /*!
  * \brief Number of tick size steps for rx timeout
  */
-#define RX_TIMEOUT_VALUE                            100 // ms
+#define RX_TIMEOUT_VALUE                            100 // ms,unkown factor
 
 /*!
  * \brief Size of ticks (used for Tx and Rx timeout)
@@ -288,7 +291,13 @@ int main( )
 
     Radio.SetRfFrequency( RF_FREQUENCY );
     Radio.SetBufferBaseAddresses( 0x00, 0x00 );
+		
+		
+		
     Radio.SetTxParams( TX_OUTPUT_POWER, RADIO_RAMP_20_US );
+
+
+
 
     // only used in GENERIC and BLE mode
     Radio.SetSyncWord( 1, ( uint8_t[] ){ 0xDD, 0xA0, 0x96, 0x69, 0xDD } );
@@ -302,11 +311,20 @@ int main( )
 
     while( 1 )
     {
-        switch( AppState )
+      
+				if(tx_times>=1000)
+					break;
+			
+			  switch( AppState )
         {
             case APP_RX:
                 AppState = APP_LOWPOWER;
-                RxLed = !RxLed;
+                
+						
+								rx_times++;
+						
+						
+						    RxLed = !RxLed;
                 Radio.GetPayload( Buffer, &BufferSize, BUFFER_SIZE );
 								Radio.GetPacketStatus(&PacketStatus);
 								RssiValue = PacketStatus.LoRa.RssiPkt;
@@ -363,7 +381,12 @@ int main( )
 
             case APP_TX:
                 AppState = APP_LOWPOWER;
-                TxLed = !TxLed;
+                
+						
+								tx_times++;
+						
+						
+						    TxLed = !TxLed;
                 if( isMaster == true )
                 {
                     s.printf( "Ping...\r\n" );
@@ -425,6 +448,9 @@ int main( )
                 break;
         }
     }
+		
+		s.printf( "¶ª°üÂÊÎª%f\r\n",(1.0-rx_times/tx_times) );
+		
 }
 
 void OnTxDone( void )
