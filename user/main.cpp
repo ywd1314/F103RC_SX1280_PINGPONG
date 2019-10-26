@@ -252,8 +252,8 @@ int main( )
 
     s.printf( "\nPing Pong running in LORA mode\n\r");
     modulationParams.PacketType                  = PACKET_TYPE_LORA;
-    modulationParams.Params.LoRa.SpreadingFactor = LORA_SF5;
-    modulationParams.Params.LoRa.Bandwidth       = LORA_BW_0200;
+    modulationParams.Params.LoRa.SpreadingFactor = LORA_SF12;
+    modulationParams.Params.LoRa.Bandwidth       = LORA_BW_1600;
     modulationParams.Params.LoRa.CodingRate      = LORA_CR_4_5;
 
     PacketParams.PacketType                 = PACKET_TYPE_LORA;
@@ -449,7 +449,7 @@ int main( )
         }
     }
 		
-		s.printf( "丢包率为%f\r\n",(1.0-rx_times/tx_times) );
+		s.printf( "丢包率为%f\r\n",(1.0-(float)rx_times/tx_times) );
 		
 }
 
